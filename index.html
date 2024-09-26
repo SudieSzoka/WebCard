@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片自定义编辑器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="image-preview">
+            <canvas id="imageCanvas"></canvas>
+            <button id="downloadButton">下载图片</button>
+        </div>
+        <div class="editor-panel">
+            <h2 id="backgroundSettingsToggle" class="settings-toggle">
+                <span>背景设置</span>
+                <span class="toggle-icon">▼</span>
+            </h2>
+            <div id="backgroundSettingsContainer">
+                <!-- 修改这里：添加一个新的 class 名称 -->
+                <div id="backgroundSettingsContainer">
+                    <div class="setting-row background-type-container short-select">
+                        <label for="backgroundType">背景类型 </label>
+                        <select id="backgroundType">
+                            <option value="gradient">渐变背景</option>
+                            <option value="image">图片背景</option>
+                            <option value="solid">纯色背景</option>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <label for="canvasWidth">背景宽度 </label>
+                        <input type="number" id="canvasWidth" value="300">
+                    </div>
+                    <div class="setting-row">
+                        <label for="canvasHeight">背景高度 </label>
+                        <input type="number" id="canvasHeight" value="400">
+                    </div>
+
+                    <div id="solidColorSettings" class="background-option">
+                        <div class="setting-row">
+                            <label for="solidColor">背景颜色 </label>
+                            <input type="color" id="solidColor" value="#FFFFFF">
+                        </div>
+                    </div>
+                    <div id="gradientSettings" class="background-option" style="display:none;">
+                        <div class="setting-row">
+                            <label for="gradientEndColor">开始颜色 </label>
+                            <input type="color" id="gradientEndColor" value="#FFFF00">
+                        </div>
+                        <div class="setting-row">
+                            <label for="gradientStartColor">结束颜色 </label>
+                            <input type="color" id="gradientStartColor" value="#FF0000">
+                        </div>
+                        <div class="setting-row">
+                            <label for="gradientAngle">渐变角度 </label>
+                            <input type="number" id="gradientAngle" min="0" max="360" value="0">
+                        </div>
+                    </div>
+                    <div id="imageSettings" class="background-option" style="display:none;">
+                        <div class="setting-row">
+                            <label for="backgroundImage">选择图片 </label>
+                            <div class="background-image-wrapper">
+                                <span class="background-image-name"> </span>
+                                <label for="backgroundImage" class="background-image-button">浏览</label>
+                                <input type="file" id="backgroundImage" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+        </div>
+            <!-- Block列表部分 -->
+        <h2 id="blockListToggle" class="settings-toggle">元素列表 <span class="toggle-icon">▼</span></h2>
+        <div id="blockListContainer">
+            <div id="blockList">
+                <!-- Block列表将在这里动态生成 -->
+            </div>
+            <button id="addBlock">添加新Block</button>
+        </div>
+
+        <!-- 模板设置部分 -->
+        <h2 id="templateSettingsToggle" class="settings-toggle">模板设置 <span class="toggle-icon">▼</span></h2>
+        <div id="templateSettingsContainer">
+            <div class="template-selection">
+                <select id="templateList">
+                    <option value="">选择模板</option>
+                </select>
+            </div>
+            <div class="button-row">
+                <button id="saveTemplate">保存模板</button>
+                <button id="renameTemplate">修改名字</button>
+                <button id="deleteTemplate">删除模板</button>
+            </div>
+            <div class="button-row">
+                <button id="exportTemplate">导出模板</button>
+                <button id="importTemplate">导入模板</button>
+            </div>          
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
