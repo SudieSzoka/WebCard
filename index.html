@@ -9,6 +9,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
+    <header>
+        <div class="logo">
+            <img src="image/logo.png" alt="Logo" id="logo">
+            <h1 class="site-title">图片自定义编辑器</h1>
+        </div>
+        <div class="header-right">
+            <button id="instructionsButton">使用说明</button>
+            <button id="contactButton">联系我们</button>
+        </div>
+    </header>
+    <!-- 新增说明弹窗 -->
+    <div id="instructionsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>使用说明</h2>
+            <p>你可以自由开始编辑了...</p>
+        </div>
+    </div>
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>联系我们</h2>
+            <img src="image/me.jpg" alt="联系我们" id="contactImage">
+        </div>
+    </div>
+          
     <div class="container">
         <div class="image-preview">
             <canvas id="imageCanvas"></canvas>
@@ -38,7 +64,14 @@
                         <label for="canvasHeight">背景高度 </label>
                         <input type="number" id="canvasHeight" value="400">
                     </div>
-
+                    <!-- 添加新的锁定比例选项 -->
+                    <div class="setting-row">
+                        <label for="lockAspectRatio">锁定比例 </label>
+                        <input type="checkbox" id="lockAspectRatio">
+                        <!-- 添加新的锁定比例选项 
+                        <span class="setting-description">保持宽高比例不变</span>
+                        -->
+                    </div>
                     <div id="solidColorSettings" class="background-option">
                         <div class="setting-row">
                             <label for="solidColor">背景颜色 </label>
@@ -57,6 +90,12 @@
                         <div class="setting-row">
                             <label for="gradientAngle">渐变角度 </label>
                             <input type="number" id="gradientAngle" min="0" max="360" value="0">
+                        </div>
+                        <div class="setting-row">
+                            <label for="gradientPresets">预设色彩</label>
+                            <div id="gradientPresets" class="gradient-presets">
+                                <!-- 按钮将通过JavaScript动态生成 -->
+                            </div>
                         </div>
                     </div>
                     <div id="imageSettings" class="background-option" style="display:none;">
@@ -84,20 +123,22 @@
         <!-- 模板设置部分 -->
         <h2 id="templateSettingsToggle" class="settings-toggle">模板设置 <span class="toggle-icon">▼</span></h2>
         <div id="templateSettingsContainer">
-            <div class="template-selection">
-                <select id="templateList">
-                    <option value="">选择模板</option>
-                </select>
+            <div class="compact-template-settings">
+                <div class="template-selection">
+                    <select id="templateList">
+                        <option value="">选择模板</option>
+                    </select>
+                </div>
+                <div class="button-row">
+                    <button id="saveTemplate">保存模板</button>
+                    <button id="renameTemplate">修改名字</button>
+                    <button id="deleteTemplate">删除模板</button>
+                </div>
+                <div class="button-row">
+                    <button id="exportTemplate">导出模板</button>
+                    <button id="importTemplate">导入模板</button>
+                </div>
             </div>
-            <div class="button-row">
-                <button id="saveTemplate">保存模板</button>
-                <button id="renameTemplate">修改名字</button>
-                <button id="deleteTemplate">删除模板</button>
-            </div>
-            <div class="button-row">
-                <button id="exportTemplate">导出模板</button>
-                <button id="importTemplate">导入模板</button>
-            </div>          
         </div>
         <!-- 批量生成 -->
         <h2 id="batchGenerationToggle" class="settings-toggle">

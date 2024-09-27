@@ -1,3 +1,18 @@
+@font-face {
+    font-family: 'LXGW Marker Gothic';
+    src: url('./fonts/LXGWMarkerGothic-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Source Han Serif CN';
+    src: url('./fonts/SourceHanSerifCN-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: '仓迹高德国妙黑';
+    src: url('./fonts/仓迹高德国妙黑.otf') format('opentype');
+}
+
 body {
     font-family: 'Roboto', sans-serif;
     background-color: #0a192f;
@@ -25,17 +40,17 @@ body {
 .editor-panel {
     flex: 1;
     background-color: #0a192f;
-    padding: 20px;
+    padding: 10px;
     overflow-y: auto;
     border-left: 1px solid #233554;
-    overflow-y: scroll;
 }
 
 h2 {
     color: #64ffda;
     border-bottom: 2px solid #64ffda;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
+    padding-bottom: 0px;
+    margin-bottom: 5px;
+    margin-top: 10px;
     background: none;
     font-weight: 300;
     letter-spacing: 1px;
@@ -74,8 +89,14 @@ button:hover {
 
 #backgroundSettingsContainer,
 #blockListContainer,
-#templateSettingsContainer {
-    transition: max-height 0.3s ease, opacity 0.3s ease;
+#templateSettingsContainer,
+#batchGenerationContainer {
+    background-color: #16213e;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: max-height 0.3s ease-out, opacity 0.2s ease-out, margin-bottom 0.3s ease-out;
     max-height: 1000px;
     opacity: 1;
     overflow: hidden;
@@ -83,17 +104,14 @@ button:hover {
 
 #backgroundSettingsContainer.collapsed,
 #blockListContainer.collapsed,
-#templateSettingsContainer.collapsed {
+#templateSettingsContainer.collapsed,
+#batchGenerationContainer.collapsed {
     max-height: 0;
     opacity: 0;
-}
-
-#backgroundSettingsContainer {
-    background-color: #16213e;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border: none;
 }
 
 #backgroundSettingsContainer > * {
@@ -176,41 +194,21 @@ button:hover {
     margin-left: 5px;
 }
 
-.setting-row.canvas-size {
+.setting-row {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     flex-wrap: nowrap;
-    min-height: 36px;
+    min-height: 30px;
 }
 
-.setting-row.canvas-size label {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    width: auto;
-    min-width: 90px;
-    margin-right: 10px;
-    flex-shrink: 0;
-    text-align: justify;
-    text-align-last: justify;
-    line-height: 1.2;
-    overflow: visible;
+.setting-row.canvas-size {
+    margin-bottom: 10px;
 }
 
 .setting-row.canvas-size input {
-    width: auto;
     padding: 8px 12px;
-    margin-top: 0;
     height: 36px;
-    flex-grow: 1;
-    max-width: 200px;
-    border: 1px solid #233554;
-    background-color: #0f3460;
-    color: #e0e0e0;
-    border-radius: 4px;
-    box-sizing: border-box;
 }
 
 #scaleInfo {
@@ -243,6 +241,36 @@ button:hover {
     width: 100px;
 }
 
+
+.color-picker input[type="color"] {
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.color-picker input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.color-picker input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #64ffda;
+}
+
+.color-picker input[type="color"]:hover {
+    transform: scale(1.1);
+}
+
+.color-picker input[type="color"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.5);
+}
+
 .background-type-container {
     display: flex;
     align-items: center;
@@ -259,15 +287,6 @@ button:hover {
 .background-type-container select {
     flex-grow: 1;
 }
-
-.setting-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px; /* 从 10px 减少到 5px */
-    flex-wrap: nowrap;
-    min-height: 30px; /* 从 36px 减少到 30px */
-}
-
 
 .setting-description {
     font-size: 12px;
@@ -291,8 +310,8 @@ button:hover {
 
 .block {
     background-color: #16213e;
-    padding: 10px; /* 从 15px 减少到 10px */
-    margin-bottom: 10px; /* 从 15px 减少到 10px */
+    padding: 10px;
+    margin-bottom: 10px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -301,7 +320,7 @@ button:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px; /* 从 10px 减少到 5px */
+    margin-bottom: 5px;
 }
 
 .block-header h3 {
@@ -349,7 +368,7 @@ button:hover {
     transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
     max-height: 1000px;
     opacity: 1;
-    margin-top: 5px; /* 从 10px 减少到 5px */
+    margin-top: 5px;
 }
 
 .block-settings.collapsed {
@@ -392,10 +411,10 @@ button:hover {
     display: flex;
     justify-content: space-between; 
     align-items: center;
-    padding: 15px;
+    padding: 10px;
     background-color: #112240;
     border: 1px solid #233554;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     border-radius: 8px;
     transition: all 0.3s ease;
 }
@@ -491,14 +510,14 @@ button:hover {
     display: flex;
     align-items: center;
     flex-grow: 1;
-    max-width: 350px;
+    max-width: 310px;
 }
 
 .background-image-name {
     flex-grow: 1;
     margin-right: 10px;
-    padding: 8px 12px;
-    height: 36px;
+    padding: 4px 8px;
+    height: 30px;
     border: 1px solid #233554;
     background-color: #0f3460;
     color: #e0e0e0;
@@ -513,12 +532,11 @@ button:hover {
     background-color: #3498db;
     color: white;
     border: none;
-    padding: 8px 12px;
+    padding: 0;
     cursor: pointer;
     transition: all 0.3s ease;
-    max-width: 60px;
-    height: 36px;
-    line-height: 20px;
+    height: 30px;
+    line-height: 22px;
     font-size: 14px;
     flex-shrink: 0;
     border-radius: 4px;
@@ -547,24 +565,32 @@ button:hover {
     gap: 10px;
 }
 
-#templateSettingsContainer .template-selection {
-    width: 100%;
-    margin-bottom: 10px;
+.compact-template-settings {
+    transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+    max-height: 1000px;
+    opacity: 1;
+    overflow: hidden;
+}
+
+.compact-template-settings.collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    display: none;
 }
 
 .button-row {
     display: flex;
     gap: 10px;
+    justify-content: center; /* 居中对齐按钮 */
 }
 
-#templateSettingsContainer button {
-    flex: 0 0 auto;
-    min-width: 120px;
-    max-width: none;
-}
-
-#deleteTemplate {
-    align-self: flex-start;
+#templateSettingsContainer button,
+#batchGenerationContainer button {
+    flex: 0 1 auto; /* 改为自动调整大小 */
+    min-width: 100px; /* 设置最小宽度 */
+    max-width: 150px; /* 设置最大宽度 */
+    width: calc(50% - 5px); /* 设置宽度为父容器的50%减去间隔的一半 */
 }
 
 #exportTemplate {
@@ -603,7 +629,7 @@ button:hover {
     background-color: #45c3a8;
     box-shadow: 0 0 15px rgba(100, 255, 218, 0.7);
 }
-/* 在文件末尾添加以下样式 */
+
 #batchGenerationContainer {
     background-color: #16213e;
     padding: 15px;
@@ -647,22 +673,220 @@ button:hover {
 #batchDownload {
     background-color: #27ae60;
     color: white;
+    /* 删除 flex: 1 1 0; */
 }
 
 #batchDownload:hover {
     background-color: #2ecc71;
 }
-@font-face {
-    font-family: 'LXGW Marker Gothic';
-    src: url('./fonts/LXGWMarkerGothic-Regular.ttf') format('truetype');
+
+.gradient-preset-container {
+    display: flex;
+    align-items: center;
 }
 
-@font-face {
-    font-family: 'Source Han Serif CN';
-    src: url('./fonts/SourceHanSerifCN-Regular.ttf') format('truetype');
+#gradientPresets {
+    flex: 1;
+    margin-right: 10px;
 }
 
-@font-face {
-    font-family: '仓迹高德国妙黑';
-    src: url('./fonts/仓迹高德国妙黑.otf') format('opentype');
+.gradient-preview {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+}
+
+.gradient-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.preset-button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.preset-button:hover {
+    transform: scale(1.1);
+}
+
+.preset-button.active {
+    box-shadow: 0 0 0 2px #64ffda;
+}
+
+#lockAspectRatio {
+    width: auto;
+    height: auto;
+    margin-right: 10px;
+}
+
+.setting-row input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    vertical-align: middle;
+    accent-color: #64ffda;
+}
+
+.setting-row.aspect-ratio-lock {
+    justify-content: flex-start;
+    align-items: flex-start; /* 改为 flex-start */
+}
+
+.setting-row.aspect-ratio-lock label {
+    min-width: auto;
+    margin-right: 10px;
+}
+
+.setting-row.aspect-ratio-lock input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    vertical-align: top; /* 改为 top */
+    accent-color: #64ffda;
+    /* 添加以下属性 */
+    margin-left: 0;
+    padding-left: 0;
+}
+
+/* Header 样式 */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #0a192f;
+    border-bottom: 1px solid #233554;
+}
+
+.header-right {
+    display: flex;
+    gap: 10px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 30px; /* 根据实际logo大小调整 */
+    margin-right: 15px; /* 添加右边距,与标题分开 */
+}
+
+/* 添加网站标题样式 */
+.site-title {
+    color: #64ffda;
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0;
+    padding: 0;
+    letter-spacing: 1px;
+}
+
+.header-right {
+    display: flex;
+    gap: 10px;
+    margin-right: auto; /* 添加这行,将按钮组向左推 */
+    margin-right: 40px; /* 添加这行,给左侧留出一些空间 */
+}
+
+#instructionsButton {
+    color: #64ffda;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 1px solid #64ffda;
+    border-radius: 4px;
+    background-color: transparent; /* 添加这行 */
+}
+
+#instructionsButton:hover {
+    color: #0a192f; /* 修改这行 */
+    background-color: #64ffda; /* 添加这行 */
+    box-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+}
+
+/* 模态弹窗样式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 25, 47, 0.8);
+}
+
+.modal-content {
+    background-color: #112240;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #233554;
+    width: 80%;
+    max-width: 600px;
+    color: #8892b0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.close {
+    color: #64ffda;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    color: #45c3a8;
+    text-decoration: none;
+}
+
+.modal-content h2 {
+    color: #64ffda;
+    border-bottom: 2px solid #64ffda;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.modal-content p {
+    line-height: 1.6;
+}
+
+#contactButton {
+    color: #64ffda;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    padding: 5px 10px;
+    border: 1px solid #64ffda;
+    border-radius: 4px;
+    background-color: transparent;
+    margin-left: 10px; /* 添加左边距 */
+}
+
+#contactButton:hover {
+    color: #0a192f;
+    background-color: #64ffda;
+    box-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+}
+
+#contactImage {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
 }

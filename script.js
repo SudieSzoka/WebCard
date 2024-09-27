@@ -2,6 +2,16 @@ let canvas, ctx, blocks = [], currentBackground, resizeTimeout;
 let templates = {};
 let generatedImages = [];
 let currentImageIndex = 0;
+let backgroundImage = null;
+let aspectRatio = 1; // 添加这个变量来存储宽高比
+
+const gradientPresets = {
+    sunset: { startColor: '#FF512F', endColor: '#F09819', name: '日落' },
+    ocean: { startColor: '#2E3192', endColor: '#1BFFFF', name: '海洋' },
+    forest: { startColor: '#134E5E', endColor: '#71B280', name: '森林' },
+    lavender: { startColor: '#834D9B', endColor: '#D04ED6', name: '薰衣草' },
+    fire: { startColor: '#FF0000', endColor: '#FDCF58', name: '火焰' }
+};
 
 class Block {
     constructor(height = 100, width) {
@@ -21,8 +31,30 @@ class Block {
         this.isCollapsed = false; // 新增属性
         this.name = ''; // 新增name属性
         this.lineHeight = 1.2; // 添加行高属性
+        this.imageWidth = 0;
+        this.imageHeight = 0;
     }
+    
+    loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                // 计算缩放比例
+                const scaleX = this.width / img.width;
+                const scaleY = this.height / img.height;
+                const scale = Math.min(scaleX, scaleY, 1); // 不超过1，避免放大
 
+                // 计算缩放后的尺寸
+                this.imageWidth = Math.round(img.width * scale);
+                this.imageHeight = Math.round(img.height * scale);
+
+                this.image = img;
+                resolve();
+            };
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
     render(ctx) {
         // 使用this.x和this.y绘制Block的边框和背景
         ctx.fillStyle = 'rgba(200, 200, 200, 0)';
@@ -33,25 +65,33 @@ class Block {
             const fontString = `${this.fontSize}px "${this.font}", sans-serif`;
             ctx.font = fontString;
             ctx.textAlign = this.textAlign;
-            ctx.textBaseline = 'top'; // 改为 'top'，便于处理多行文本
-
+            ctx.textBaseline = 'top';
+    
             let textX = this.x + this.contentX;
             if (this.textAlign === 'center') textX += this.width / 2;
             else if (this.textAlign === 'right') textX += this.width;
-
-            let textY = this.y + this.contentY;
-
-            // 处理多行文本
+    
+            // 计算文本的总高度
             const lines = this.content.split('\n');
             const lineHeight = this.fontSize * this.lineHeight;
-
+            const totalTextHeight = lines.length * lineHeight;
+    
+            // 根据 verticalAlign 调整起始 Y 坐标
+            let textY = this.y + this.contentY;
+            if (this.verticalAlign === 'middle') {
+                textY += (this.height - totalTextHeight) / 2;
+            } else if (this.verticalAlign === 'bottom') {
+                textY += this.height - totalTextHeight;
+            }
+    
+            // 绘制每一行文本
             lines.forEach((line, index) => {
                 ctx.fillText(line, textX, textY + index * lineHeight);
             });
         } else if (this.type === 'image' && this.image) {
-            ctx.drawImage(this.image, this.x + this.contentX, this.y + this.contentY,
-                          this.imageWidth || this.width, 
-                          this.imageHeight || this.height);
+            const x = this.x + this.contentX + (this.width - this.imageWidth) / 2;
+            const y = this.y + this.contentY + (this.height - this.imageHeight) / 2;
+            ctx.drawImage(this.image, x, y, this.imageWidth, this.imageHeight);
         }
         
         // 如果Block正在编辑,添加边框
@@ -107,6 +147,9 @@ function addBlock() {
     const newBlock = new Block(100, canvas.width);
     newBlock.y = blocks.length > 0 ? blocks[blocks.length - 1].y + blocks[blocks.length - 1].height : 0;
     newBlock.name = `Block${blocks.length + 1}`; // 设置初始name
+    // 设置文字类型的字体大小为背景宽度的1/25
+    newBlock.fontSize = Math.round(canvas.width / 25);
+    
     blocks.push(newBlock);
     updateBlockList(true);
     updatePreview();
@@ -172,7 +215,7 @@ function updateBlockList(isNewBlock = false) {
                         <span class="setting-description">设置Block的Y坐标</span>
                     </div>
                     <div class="setting-row">
-                        <label for="blockHeight">高度</label>
+                        <label for="blockHeight">元素高度</label>
                         <input type="number" class="block-height" value="${block.height}" min="10">
                         <span class="setting-description">设置Block的高度</span>
                     </div>
@@ -368,19 +411,18 @@ function addBlockEventListeners(blockElement, block, index) {
         });
     });
 
-    blockElement.querySelector('.image-upload').addEventListener('change', (e) => {
+    blockElement.querySelector('.image-upload').addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = new Image();
-                img.onload = function() {
-                    block.image = img;
-                    block.imageWidth = img.width;
-                    block.imageHeight = img.height;
+            reader.onload = async function(event) {
+                try {
+                    await block.loadImage(event.target.result);
+                    updateBlockSettings(blockElement, block);
                     updatePreview();
+                } catch (error) {
+                    console.error('Error loading image:', error);
                 }
-                img.src = event.target.result;
             }
             reader.readAsDataURL(file);
         }
@@ -443,13 +485,35 @@ function addBlockEventListeners(blockElement, block, index) {
         block.lineHeight = parseFloat(e.target.value);
         updatePreview();
     });
+    // 添加图片上传功能
+    blockElement.querySelector('.image-upload').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                try {
+                    await block.loadImage(event.target.result);
+                    updateBlockSettings(blockElement, block);
+                    updatePreview();
+                } catch (error) {
+                    console.error('Error loading image:', error);
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+    });
 }
 
 function updateBlockSettings(blockElement, block) {
     const oldType = block.type;
     const newType = blockElement.querySelector('.blockType').value;
     block.type = newType;
-
+    
+    // 添加图片上传功能
+    if (block.type === 'image') {
+        blockElement.querySelector('.image-width').value = block.imageWidth || '';
+        blockElement.querySelector('.image-height').value = block.imageHeight || '';
+    }
     // 初始化新类型的默认值
     if (oldType !== newType) {
         if (newType === 'text') {
@@ -498,8 +562,24 @@ function updateBlockSettings(blockElement, block) {
 function updatePreview() {
     if (!canvas || !ctx) return;
 
+    // 创建离屏canvas
+    const offscreenCanvas = document.createElement('canvas');
+    offscreenCanvas.width = canvas.width;
+    offscreenCanvas.height = canvas.height;
+    const offscreenCtx = offscreenCanvas.getContext('2d');
+
+    // 在离屏canvas上绘制背景
+    drawBackground(offscreenCtx, offscreenCanvas);
+
+    // 在离屏canvas上绘制所有blocks
+    blocks.forEach(block => {
+        block.render(offscreenCtx);
+    });
+
+    // 将离屏canvas的内容复制到主canvas上
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+    ctx.drawImage(offscreenCanvas, 0, 0);
+
     // 计算缩放比例
     const containerWidth = canvas.parentElement.clientWidth;
     const containerHeight = canvas.parentElement.clientHeight;
@@ -522,14 +602,6 @@ function updatePreview() {
         scaleInfo.textContent = `缩放比例: ${(scale * 100).toFixed(2)}%`;
     }
 
-    // 重绘背景
-    drawBackground(ctx, canvas);
-
-    // 重绘所有 blocks
-    blocks.forEach(block => {
-        block.render(ctx);
-    });
-
     // 如果有生成的图片，显示当前图片
     if (generatedImages.length > 0) {
         showGeneratedImage();
@@ -548,9 +620,21 @@ function updateBackground() {
             currentBackground.gradientStartColor = document.getElementById('gradientStartColor').value;
             currentBackground.gradientEndColor = document.getElementById('gradientEndColor').value;
             currentBackground.gradientAngle = parseInt(document.getElementById('gradientAngle').value);
+            // 更新预设下拉菜单
+            const presetSelect = document.getElementById('gradientPresets');
+            const currentColors = {
+                startColor: currentBackground.gradientStartColor,
+                endColor: currentBackground.gradientEndColor
+            };
+            const matchingPreset = Object.keys(gradientPresets).find(key => 
+                JSON.stringify(gradientPresets[key]) === JSON.stringify(currentColors)
+            );
+            presetSelect.value = matchingPreset || '';
             break;
         case 'image':
             currentBackground.type = 'image';
+            // 如果背景类型改变为图片，重置backgroundImage
+            backgroundImage = null;
             break;
     }
     updatePreview();
@@ -567,12 +651,24 @@ function updateBackgroundSettings() {
 function updateCanvasSize() {
     const width = parseInt(document.getElementById('canvasWidth').value);
     const height = parseInt(document.getElementById('canvasHeight').value);
+    const lockAspectRatio = document.getElementById('lockAspectRatio').checked;
+
     if (width > 0 && height > 0) {
-        canvas.width = width;
-        canvas.height = height;
+        if (lockAspectRatio) {
+            // 根据修改的输入框来调整另一个输入框的值
+            if (this.id === 'canvasWidth') {
+                document.getElementById('canvasHeight').value = Math.round(width / aspectRatio);
+            } else {
+                document.getElementById('canvasWidth').value = Math.round(height * aspectRatio);
+            }
+        }
+
+        canvas.width = parseInt(document.getElementById('canvasWidth').value);
+        canvas.height = parseInt(document.getElementById('canvasHeight').value);
+
         // 更新所有Block的宽度
         blocks.forEach(block => {
-            block.width = width;
+            block.width = canvas.width;
         });
         
         updateBlockList(); // 更新Block列表显示
@@ -632,6 +728,22 @@ function init() {
     backgroundTypeSelect.value = defaultBackgroundType;
 
     updateBackgroundSettings();
+
+    // 生成渐变预设按钮
+    const presetContainer = document.getElementById('gradientPresets');
+    for (const [key, preset] of Object.entries(gradientPresets)) {
+        const button = document.createElement('button');
+        button.className = 'preset-button';
+        button.dataset.preset = key;
+        button.title = preset.name;
+        button.style.background = `linear-gradient(to right, ${preset.endColor}, ${preset.startColor})`;
+        
+        button.addEventListener('click', function() {
+            updateGradientPreset(key);
+        });
+        
+        presetContainer.appendChild(button);
+    }
     
     // 统一处理所有设置部分的折叠/展开功能
     const settingsToggles = [
@@ -652,6 +764,13 @@ function init() {
             toggleElement.addEventListener('click', function() {
                 toggleElement.classList.toggle('collapsed');
                 containerElement.classList.toggle('collapsed');
+                // 特殊处理模板设置
+                if (container === 'templateSettingsContainer') {
+                    const compactSettings = containerElement.querySelector('.compact-template-settings');
+                    if (compactSettings) {
+                        compactSettings.classList.toggle('collapsed');
+                    }
+                }
                 const toggleIcon = toggleElement.querySelector('.toggle-icon');
                 if (toggleIcon) {
                     toggleIcon.textContent = toggleElement.classList.contains('collapsed') ? '▶' : '▼';
@@ -662,6 +781,12 @@ function init() {
             if (toggle === 'templateSettingsToggle' || toggle === 'batchGenerationToggle') {
                 toggleElement.classList.add('collapsed');
                 containerElement.classList.add('collapsed');
+                if (container === 'templateSettingsContainer') {
+                    const compactSettings = containerElement.querySelector('.compact-template-settings');
+                    if (compactSettings) {
+                        compactSettings.classList.add('collapsed');
+                    }
+                }
                 const toggleIcon = toggleElement.querySelector('.toggle-icon');
                 if (toggleIcon) {
                     toggleIcon.textContent = '▶';
@@ -737,7 +862,47 @@ function init() {
 
     // 添加批量下载按钮的事件监听器
     document.getElementById('batchDownload').addEventListener('click', batchDownload);
+
+    // 添加新的渐变预设按钮事件监听器
+    const presetButtons = document.querySelectorAll('.preset-button');
+    presetButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            updateGradientPreset(this.dataset.preset);
+        });
+    });
+    
+    // 修改现有的事件监听器
+    document.getElementById('gradientStartColor').addEventListener('input', () => updateGradientPreset('custom'));
+    document.getElementById('gradientEndColor').addEventListener('input', () => updateGradientPreset('custom'));
+    // 确保在页面加载时调用一次 updateGradientPreset
+    updateGradientPreset();
+
+    // 初始化宽高比
+    aspectRatio = canvas.width / canvas.height;
+
+    // 添加锁定比例复选框的事件监听器
+    document.getElementById('lockAspectRatio').addEventListener('change', updateAspectRatioLock);
 }
+
+// 修改updateGradientPreset函数
+function updateGradientPreset(preset) {
+    const startColorInput = document.getElementById('gradientStartColor');
+    const endColorInput = document.getElementById('gradientEndColor');
+    
+    // 移除所有按钮的active类
+    document.querySelectorAll('.preset-button').forEach(btn => btn.classList.remove('active'));
+    
+    if (preset && gradientPresets[preset]) {
+        startColorInput.value = gradientPresets[preset].startColor;
+        endColorInput.value = gradientPresets[preset].endColor;
+        
+        // 添加active类到选中的按钮
+        document.querySelector(`.preset-button[data-preset="${preset}"]`).classList.add('active');
+    }
+    
+    updateBackground();
+}
+
 // 保存模板
 // 修改保存模板函数
 function saveTemplate() {
@@ -838,9 +1003,10 @@ function loadTemplate() {
         const newBlock = new Block(b.height, b.width);
         Object.assign(newBlock, b);
         if (b.type === 'image' && b.image) {
-            const img = new Image();
-            img.src = b.image.src;
-            newBlock.image = img;
+            newBlock.loadImage(b.image.src).then(() => {
+                updateBlockList();
+                updatePreview();
+            });
         }
         return newBlock;
     });
@@ -1076,10 +1242,13 @@ function exportTextBlocks(format) {
                       ('0' + now.getDate()).slice(-2);
 
     if (format === 'csv') {
-        // CSV 导出逻辑保持不变
-        // ... 保留原有的 CSV 导出代码 ...
+        // CSV 导出逻辑
+        let csvContent = keys.join(',') + '\n';
+        csvContent += keys.map(key => textBlocks[keys.indexOf(key)].content).join(',');
+        const fileName = `卡片模板_${templateName}_${timestamp}.csv`;
+        downloadFile(csvContent, fileName, 'text/csv;charset=utf-8;');
     } else if (format === 'json') {
-        // 修改 JSON 导出逻辑
+        // JSON 导出逻辑保持不变
         const jsonData = [
             textBlocks.reduce((obj, block, index) => {
                 obj[keys[index]] = block.content;
@@ -1154,23 +1323,17 @@ function parseCSV(csv) {
 function generateImages(data) {
     generatedImages = [];
     const imagePromises = data.map((item, dataIndex) => {
-        return new Promise((resolve) => {
-            const newBlocks = blocks.map((block, index) => {
+        return new Promise(async (resolve) => {
+            const newBlocks = await Promise.all(blocks.map(async (block, index) => {
                 const newBlock = new Block(block.height, block.width);
                 Object.assign(newBlock, JSON.parse(JSON.stringify(block)));
                 if (newBlock.type === 'text') {
-                    const id = `${index + 1}_${block.name}`;
-                    if (item[id] !== undefined) {
-                        newBlock.content = item[id];
-                    } else {
-                        console.warn(`未找到ID为 ${id} 的数据`);
-                    }
+                    // ... existing code ...
                 } else if (newBlock.type === 'image' && block.image) {
-                    newBlock.image = new Image();
-                    newBlock.image.src = block.image.src;
+                    await newBlock.loadImage(block.image.src);
                 }
                 return newBlock;
-            });
+            }));
 
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = canvas.width;
@@ -1252,16 +1415,16 @@ function drawBackground(ctx, canvas) {
             break;
         case 'image':
             if (currentBackground.imageSrc) {
-                const img = new Image();
-                img.onload = function() {
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    // 重新绘制所有blocks
-                    blocks.forEach(block => block.render(ctx));
-                    // 更新生成的图片
-                    generatedImages[currentImageIndex] = canvas.toDataURL('image/png');
-                    showGeneratedImage();
+                if (!backgroundImage) {
+                    backgroundImage = new Image();
+                    backgroundImage.onload = function() {
+                        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+                        updatePreview();
+                    }
+                    backgroundImage.src = currentBackground.imageSrc;
+                } else {
+                    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
                 }
-                img.src = currentBackground.imageSrc;
             }
             break;
     }
@@ -1311,6 +1474,64 @@ function batchDownload() {
         const zipFileName = `model_${templateName}_${timestamp}.zip`;
         saveAs(content, zipFileName);
     });
+}
+
+function updateAspectRatioLock() {
+    const lockAspectRatio = document.getElementById('lockAspectRatio').checked;
+    if (lockAspectRatio) {
+        aspectRatio = canvas.width / canvas.height;
+    }
+}
+
+
+// 获取模态框元素
+const modal = document.getElementById("instructionsModal");
+
+// 获取打开模态框的按钮
+const btn = document.getElementById("instructionsButton");
+
+// 获取关闭模态框的 <span> 元素
+const span = document.getElementsByClassName("close")[0];
+
+// 当用户点击按钮时，打开模态框
+btn.onclick = function() {
+    modal.style.display = "block";
+}
+
+// 当用户点击 <span> (x), 关闭模态框
+span.onclick = function() {
+    modal.style.display = "none";
+}
+
+// 当用户点击模态框外部时，关闭它
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+// 获取联系我们按钮和模态框
+const contactButton = document.getElementById('contactButton');
+const contactModal = document.getElementById('contactModal');
+
+// 点击联系我们按钮时显示模态框
+contactButton.onclick = function() {
+    contactModal.style.display = "block";
+}
+
+// 为联系我们模态框添加关闭功能
+contactModal.querySelector('.close').onclick = function() {
+    contactModal.style.display = "none";
+}
+
+// 点击模态框外部时关闭
+window.onclick = function(event) {
+    if (event.target == instructionsModal) {
+        instructionsModal.style.display = "none";
+    }
+    if (event.target == contactModal) {
+        contactModal.style.display = "none";
+    }
 }
 
 document.addEventListener('DOMContentLoaded', init);
