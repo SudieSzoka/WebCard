@@ -122,9 +122,9 @@ button:hover {
 .setting-row input,
 .setting-row select {
     width: auto;
-    padding: 8px 12px;
+    padding: 4px 8px;
     margin-top: 0;
-    height: 36px;
+    height: 30px;
     flex-grow: 1;
     max-width: 200px;
     border: 1px solid #233554;
@@ -263,10 +263,11 @@ button:hover {
 .setting-row {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 5px; /* 从 10px 减少到 5px */
     flex-wrap: nowrap;
-    min-height: 36px;
+    min-height: 30px; /* 从 36px 减少到 30px */
 }
+
 
 .setting-description {
     font-size: 12px;
@@ -290,8 +291,8 @@ button:hover {
 
 .block {
     background-color: #16213e;
-    padding: 15px;
-    margin-bottom: 15px;
+    padding: 10px; /* 从 15px 减少到 10px */
+    margin-bottom: 10px; /* 从 15px 减少到 10px */
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -300,7 +301,7 @@ button:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 5px; /* 从 10px 减少到 5px */
 }
 
 .block-header h3 {
@@ -348,7 +349,7 @@ button:hover {
     transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
     max-height: 1000px;
     opacity: 1;
-    margin-top: 10px;
+    margin-top: 5px; /* 从 10px 减少到 5px */
 }
 
 .block-settings.collapsed {
@@ -601,4 +602,67 @@ button:hover {
 #downloadButton:hover {
     background-color: #45c3a8;
     box-shadow: 0 0 15px rgba(100, 255, 218, 0.7);
+}
+/* 在文件末尾添加以下样式 */
+#batchGenerationContainer {
+    background-color: #16213e;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#previewControls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+}
+
+#previewControls button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    margin: 0 10px;
+}
+
+#previewControls button:hover {
+    background-color: #2980b9;
+}
+
+#previewControls button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+}
+
+#imageCounter {
+    font-size: 14px;
+    color: #64ffda;
+}
+
+#batchDownload {
+    background-color: #27ae60;
+    color: white;
+}
+
+#batchDownload:hover {
+    background-color: #2ecc71;
+}
+@font-face {
+    font-family: 'LXGW Marker Gothic';
+    src: url('./fonts/LXGWMarkerGothic-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Source Han Serif CN';
+    src: url('./fonts/SourceHanSerifCN-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: '仓迹高德国妙黑';
+    src: url('./fonts/仓迹高德国妙黑.otf') format('opentype');
 }

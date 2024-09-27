@@ -1,5 +1,7 @@
 let canvas, ctx, blocks = [], currentBackground, resizeTimeout;
 let templates = {};
+let generatedImages = [];
+let currentImageIndex = 0;
 
 class Block {
     constructor(height = 100, width) {
@@ -18,6 +20,7 @@ class Block {
         this.contentY = 0; // 添加新属性，用于内部元素的Y坐标
         this.isCollapsed = false; // 新增属性
         this.name = ''; // 新增name属性
+        this.lineHeight = 1.2; // 添加行高属性
     }
 
     render(ctx) {
@@ -28,20 +31,23 @@ class Block {
         if (this.type === 'text') {
             ctx.fillStyle = 'black';
             const fontString = `${this.fontSize}px "${this.font}", sans-serif`;
-            // console.log('Setting font:', fontString);
             ctx.font = fontString;
             ctx.textAlign = this.textAlign;
-            ctx.textBaseline = this.verticalAlign;
+            ctx.textBaseline = 'top'; // 改为 'top'，便于处理多行文本
 
-            let textX = this.x + this.contentX; // 使用contentX
+            let textX = this.x + this.contentX;
             if (this.textAlign === 'center') textX += this.width / 2;
             else if (this.textAlign === 'right') textX += this.width;
 
             let textY = this.y + this.contentY;
-            if (this.verticalAlign === 'middle') textY += this.height / 2;
-            else if (this.verticalAlign === 'bottom') textY += this.height;
 
-            ctx.fillText(this.content, textX, textY);
+            // 处理多行文本
+            const lines = this.content.split('\n');
+            const lineHeight = this.fontSize * this.lineHeight;
+
+            lines.forEach((line, index) => {
+                ctx.fillText(line, textX, textY + index * lineHeight);
+            });
         } else if (this.type === 'image' && this.image) {
             ctx.drawImage(this.image, this.x + this.contentX, this.y + this.contentY,
                           this.imageWidth || this.width, 
@@ -118,6 +124,20 @@ function addBlock() {
     }
 }
 
+// 添加字体数组
+const availableFonts = [
+    // 添加你的自定义字体
+    { name: '仓迹高德国妙黑', value: '仓迹高德国妙黑' },
+    { name: '宋体', value: 'SimSun' },
+    { name: '黑体', value: 'SimHei' },
+    { name: '微软雅黑', value: 'Microsoft YaHei' },
+    { name: '楷体', value: 'KaiTi' },
+    { name: '仿宋', value: 'FangSong' },
+    { name: 'LXGW Marker Gothic', value: 'LXGW Marker Gothic' },
+    { name: 'Source Han Serif CN', value: 'Source Han Serif CN' },
+    { name: 'Arial', value: 'Arial' },
+    { name: 'Times New Roman', value: 'Times New Roman' },
+];
 function updateBlockList(isNewBlock = false) {
     const blockList = document.getElementById('blockList');
     blockList.innerHTML = '';
@@ -159,8 +179,13 @@ function updateBlockList(isNewBlock = false) {
                     <div class="text-settings" ${block.type === 'text' ? '' : 'style="display:none;"'}>
                         <div class="setting-row">
                             <label for="blockContent">内容</label>
-                            <input type="text" class="block-content" value="${block.content}">
-                            <span class="setting-description">输入文本内容</span>
+                            <textarea class="block-content" rows="3">${block.content}</textarea>
+                            <span class="setting-description">输入文本内容（支持换行）</span>
+                        </div>
+                        <div class="setting-row">
+                            <label for="lineHeight">行高</label>
+                            <input type="number" class="line-height" value="${block.lineHeight}" min="0.5" max="3" step="0.1">
+                            <span class="setting-description">设置文本行高（1.0-3.0）</span>
                         </div>
                         <div class="setting-row">
                             <label for="textAlign">水平对齐</label>
@@ -183,13 +208,9 @@ function updateBlockList(isNewBlock = false) {
                         <div class="setting-row">
                             <label for="font">字体</label>
                             <select class="font">
-                                <option value="SimSun" ${block.font === 'SimSun' ? 'selected' : ''}>宋体</option>
-                                <option value="SimHei" ${block.font === 'SimHei' ? 'selected' : ''}>黑体</option>
-                                <option value="Microsoft YaHei" ${block.font === 'Microsoft YaHei' ? 'selected' : ''}>微软雅黑</option>
-                                <option value="KaiTi" ${block.font === 'KaiTi' ? 'selected' : ''}>楷体</option>
-                                <option value="FangSong" ${block.font === 'FangSong' ? 'selected' : ''}>仿宋</option>
-                                <option value="Arial" ${block.font === 'Arial' ? 'selected' : ''}>Arial</option>
-                                <option value="Times New Roman" ${block.font === 'Times New Roman' ? 'selected' : ''}>Times New Roman</option>
+                                ${availableFonts.map(font => 
+                                    `<option value="${font.value}" ${block.font === font.value ? 'selected' : ''}>${font.name}</option>`
+                                ).join('')}
                             </select>
                             <span class="setting-description">设置文本字体</span>
                         </div>
@@ -412,6 +433,16 @@ function addBlockEventListeners(blockElement, block, index) {
         blockElement.querySelector('.block-header h3').textContent = block.name || `Block ${index + 1}`;
         updatePreview();
     });
+
+    blockElement.querySelector('.block-content').addEventListener('input', (e) => {
+        block.content = e.target.value;
+        updatePreview();
+    });
+
+    blockElement.querySelector('.line-height').addEventListener('input', (e) => {
+        block.lineHeight = parseFloat(e.target.value);
+        updatePreview();
+    });
 }
 
 function updateBlockSettings(blockElement, block) {
@@ -492,19 +523,17 @@ function updatePreview() {
     }
 
     // 重绘背景
-    setBackground(currentBackground.type, {
-        color: currentBackground.color,
-        startColor: currentBackground.gradientStartColor,
-        endColor: currentBackground.gradientEndColor,
-        angle: currentBackground.gradientAngle,
-        src: currentBackground.imageSrc
-    });
+    drawBackground(ctx, canvas);
 
     // 重绘所有 blocks
     blocks.forEach(block => {
-        // console.log('Rendering block with font:', block.font);
         block.render(ctx);
     });
+
+    // 如果有生成的图片，显示当前图片
+    if (generatedImages.length > 0) {
+        showGeneratedImage();
+    }
 }
 
 function updateBackground() {
@@ -608,7 +637,8 @@ function init() {
     const settingsToggles = [
         { toggle: 'backgroundSettingsToggle', container: 'backgroundSettingsContainer', label: '背景设置' },
         { toggle: 'blockListToggle', container: 'blockListContainer', label: '元素列表' },
-        { toggle: 'templateSettingsToggle', container: 'templateSettingsContainer', label: '模板设置' }
+        { toggle: 'templateSettingsToggle', container: 'templateSettingsContainer', label: '模板设置' },
+        { toggle: 'batchGenerationToggle', container: 'batchGenerationContainer', label: '批量生成' }
     ];
 
     settingsToggles.forEach(({ toggle, container, label }) => {
@@ -628,8 +658,8 @@ function init() {
                 }
             });
 
-            // 初始化时折叠模板设置
-            if (toggle === 'templateSettingsToggle') {
+            // 初始化时折叠模板设置和批量生成
+            if (toggle === 'templateSettingsToggle' || toggle === 'batchGenerationToggle') {
                 toggleElement.classList.add('collapsed');
                 containerElement.classList.add('collapsed');
                 const toggleIcon = toggleElement.querySelector('.toggle-icon');
@@ -684,6 +714,29 @@ function init() {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(updatePreview, 250);
     });
+
+    // 添加批量生成的事件监听器
+    document.getElementById('exportCSV').addEventListener('click', () => exportTextBlocks('csv'));
+    document.getElementById('exportJSON').addEventListener('click', () => exportTextBlocks('json'));
+    document.getElementById('importButton').addEventListener('click', () => document.getElementById('importFile').click());
+    document.getElementById('importFile').addEventListener('change', (e) => importData(e.target.files[0]));
+    document.getElementById('prevImage').addEventListener('click', () => {
+        if (currentImageIndex > 0) {
+            currentImageIndex--;
+            updatePreviewControls();
+            showGeneratedImage();
+        }
+    });
+    document.getElementById('nextImage').addEventListener('click', () => {
+        if (currentImageIndex < generatedImages.length - 1) {
+            currentImageIndex++;
+            updatePreviewControls();
+            showGeneratedImage();
+        }
+    });
+
+    // 添加批量下载按钮的事件监听器
+    document.getElementById('batchDownload').addEventListener('click', batchDownload);
 }
 // 保存模板
 // 修改保存模板函数
@@ -1005,6 +1058,259 @@ function downloadImage() {
     link.download = fileName;
     link.href = dataURL;
     link.click();
+}
+// 240927： 添加批量生成功能
+function exportTextBlocks(format) {
+    const textBlocks = blocks.filter(block => block.type === 'text');
+    const keys = blocks.map((block, index) => 
+        block.type === 'text' ? `${index + 1}_${block.name}` : null
+    ).filter(key => key !== null);
+
+    // 获取当前选中的模板名称
+    const templateName = document.getElementById('templateList').value || 'untitled';
+    
+    // 获取当前时间并格式化
+    const now = new Date();
+    const timestamp = now.getFullYear() +
+                      ('0' + (now.getMonth() + 1)).slice(-2) +
+                      ('0' + now.getDate()).slice(-2);
+
+    if (format === 'csv') {
+        // CSV 导出逻辑保持不变
+        // ... 保留原有的 CSV 导出代码 ...
+    } else if (format === 'json') {
+        // 修改 JSON 导出逻辑
+        const jsonData = [
+            textBlocks.reduce((obj, block, index) => {
+                obj[keys[index]] = block.content;
+                return obj;
+            }, {})
+        ];
+        const json = JSON.stringify(jsonData, null, 2);
+        const fileName = `卡片模板_${templateName}_${timestamp}.json`;
+        downloadFile(json, fileName, 'application/json');
+    }
+}
+
+function downloadFile(content, fileName, contentType) {
+    const blob = new Blob([content], { type: contentType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+function importData(file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        try {
+            let data;
+            if (file.name.endsWith('.csv')) {
+                data = parseCSV(event.target.result);
+            } else if (file.name.endsWith('.json')) {
+                data = JSON.parse(event.target.result);
+                // 确保数据是数组形式
+                if (!Array.isArray(data)) {
+                    data = [data]; // 如果不是数组，将其转换为单元素数组
+                }
+            } else {
+                throw new Error('不支持的文件格式');
+            }
+            if (data.length === 0) {
+                throw new Error('没有有效的数据');
+            }
+            generateImages(data);
+        } catch (error) {
+            alert(`导入失败: ${error.message}`);
+            console.error('Import error:', error);
+        }
+    };
+    reader.onerror = function() {
+        alert('读取文件时发生错误');
+    };
+    reader.readAsText(file);
+}
+function parseCSV(csv) {
+    const lines = csv.split('\n').filter(line => line.trim() !== '');
+    if (lines.length === 0) {
+        throw new Error('CSV 文件为空或格式不正确');
+    }
+    const headers = lines[0].split(',').map(header => header.trim());
+    return lines.slice(1).map(line => {
+        const values = line.split(',').map(value => value.trim());
+        if (values.length !== headers.length) {
+            console.warn(`跳过不完整的行: ${line}`);
+            return null;
+        }
+        return headers.reduce((obj, header, index) => {
+            obj[header] = values[index] || '';
+            return obj;
+        }, {});
+    }).filter(item => item !== null);
+}
+
+function generateImages(data) {
+    generatedImages = [];
+    const imagePromises = data.map((item, dataIndex) => {
+        return new Promise((resolve) => {
+            const newBlocks = blocks.map((block, index) => {
+                const newBlock = new Block(block.height, block.width);
+                Object.assign(newBlock, JSON.parse(JSON.stringify(block)));
+                if (newBlock.type === 'text') {
+                    const id = `${index + 1}_${block.name}`;
+                    if (item[id] !== undefined) {
+                        newBlock.content = item[id];
+                    } else {
+                        console.warn(`未找到ID为 ${id} 的数据`);
+                    }
+                } else if (newBlock.type === 'image' && block.image) {
+                    newBlock.image = new Image();
+                    newBlock.image.src = block.image.src;
+                }
+                return newBlock;
+            });
+
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            // 绘制背景
+            drawBackground(tempCtx, tempCanvas);
+
+            // 创建一个Promise数组来处理所有图片加载
+            const blockPromises = newBlocks.map(block => {
+                return new Promise((blockResolve) => {
+                    if (block.type === 'image' && block.image) {
+                        block.image.onload = () => {
+                            block.render(tempCtx);
+                            blockResolve();
+                        };
+                        block.image.onerror = () => {
+                            console.error('图片加载失败:', block.image.src);
+                            blockResolve();
+                        };
+                    } else {
+                        block.render(tempCtx);
+                        blockResolve();
+                    }
+                });
+            });
+
+            // 等待所有block渲染完成
+            Promise.all(blockPromises).then(() => {
+                generatedImages[dataIndex] = tempCanvas.toDataURL('image/png');
+                resolve();
+            });
+        });
+    });
+
+    // 等待所有图片生成完成
+    Promise.all(imagePromises).then(() => {
+        currentImageIndex = 0;
+        updatePreviewControls();
+        showGeneratedImage();
+    });
+}
+
+function updatePreviewControls() {
+    const previewControls = document.getElementById('previewControls');
+    const imageCounter = document.getElementById('imageCounter');
+    const prevButton = document.getElementById('prevImage');
+    const nextButton = document.getElementById('nextImage');
+
+    if (generatedImages.length > 0) {
+        previewControls.style.display = 'flex';
+        imageCounter.textContent = `${currentImageIndex + 1} / ${generatedImages.length}`;
+        prevButton.disabled = currentImageIndex === 0;
+        nextButton.disabled = currentImageIndex === generatedImages.length - 1;
+    } else {
+        previewControls.style.display = 'none';
+    }
+}
+
+function drawBackground(ctx, canvas) {
+    switch(currentBackground.type) {
+        case 'solid':
+            ctx.fillStyle = currentBackground.color;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            break;
+        case 'gradient':
+            const angle = currentBackground.gradientAngle * Math.PI / 180;
+            const x1 = canvas.width / 2 + Math.cos(angle) * canvas.width;
+            const y1 = canvas.height / 2 + Math.sin(angle) * canvas.height;
+            const x2 = canvas.width / 2 - Math.cos(angle) * canvas.width;
+            const y2 = canvas.height / 2 - Math.sin(angle) * canvas.height;
+            
+            const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+            gradient.addColorStop(0, currentBackground.gradientStartColor);
+            gradient.addColorStop(1, currentBackground.gradientEndColor);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            break;
+        case 'image':
+            if (currentBackground.imageSrc) {
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    // 重新绘制所有blocks
+                    blocks.forEach(block => block.render(ctx));
+                    // 更新生成的图片
+                    generatedImages[currentImageIndex] = canvas.toDataURL('image/png');
+                    showGeneratedImage();
+                }
+                img.src = currentBackground.imageSrc;
+            }
+            break;
+    }
+}
+
+function showGeneratedImage() {
+    if (generatedImages.length > 0) {
+        const img = new Image();
+        img.onload = function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+        };
+        img.src = generatedImages[currentImageIndex];
+    }
+}
+
+function batchDownload() {
+    if (generatedImages.length === 0) {
+        alert('没有可下载的图片。请先导入数据并生成图片。');
+        return;
+    }
+
+    // 创建一个zip文件
+    const zip = new JSZip();
+
+    // 获取当前选中的模板名称
+    const templateName = document.getElementById('templateList').value || 'untitled';
+    
+    // 获取当前时间并格式化
+    const now = new Date();
+    const timestamp = now.getFullYear() +
+                      ('0' + (now.getMonth() + 1)).slice(-2) +
+                      ('0' + now.getDate()).slice(-2) +
+                      ('0' + now.getHours()).slice(-2) +
+                      ('0' + now.getMinutes()).slice(-2) +
+                      ('0' + now.getSeconds()).slice(-2);
+
+    // 添加每个图片到zip文件
+    generatedImages.forEach((dataUrl, index) => {
+        const fileName = `model_${templateName}_${timestamp}_${index + 1}.png`;
+        const data = dataUrl.split(',')[1];
+        zip.file(fileName, data, {base64: true});
+    });
+
+    // 生成并下载zip文件
+    zip.generateAsync({type:"blob"}).then(function(content) {
+        const zipFileName = `model_${templateName}_${timestamp}.zip`;
+        saveAs(content, zipFileName);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', init);

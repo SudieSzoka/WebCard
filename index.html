@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>图片自定义编辑器</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -96,6 +98,27 @@
                 <button id="exportTemplate">导出模板</button>
                 <button id="importTemplate">导入模板</button>
             </div>          
+        </div>
+        <!-- 批量生成 -->
+        <h2 id="batchGenerationToggle" class="settings-toggle">
+            <span>批量生成</span>
+            <span class="toggle-icon">▼</span>
+        </h2>
+        <div id="batchGenerationContainer">
+            <div class="button-row">
+                <button id="exportCSV">导出CSV</button>
+                <button id="exportJSON">导出JSON</button>
+            </div>
+            <div class="button-row">
+                <input type="file" id="importFile" accept=".csv,.json" style="display: none;">
+                <button id="importButton">导入数据</button>
+                <button id="batchDownload">批量下载</button>
+            </div>
+            <div id="previewControls" style="display: none;">
+                <button id="prevImage">上一张</button>
+                <span id="imageCounter">1 / 1</span>
+                <button id="nextImage">下一张</button>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
