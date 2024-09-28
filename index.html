@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图片自定义编辑器</title>
+    <title>卡片编辑神器</title>
+    <link rel="icon" href="image/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -12,11 +13,11 @@
     <header>
         <div class="logo">
             <img src="image/logo.png" alt="Logo" id="logo">
-            <h1 class="site-title">图片自定义编辑器</h1>
+            <h1 class="site-title">卡片编辑神器</h1>
         </div>
         <div class="header-right">
-            <button id="instructionsButton">使用说明</button>
-            <button id="contactButton">联系我们</button>
+            <button id="instructionsButton">使用Tip</button>
+            <button id="contactButton">交流群</button>
         </div>
     </header>
     <!-- 新增说明弹窗 -->
@@ -24,7 +25,12 @@
         <div class="modal-content">
             <span class="close">&times;</span>
             <h2>使用说明</h2>
-            <p>你可以自由开始编辑了...</p>
+            <p>1. 点击“添加元素”按钮，在图片上添加一个Block。</p>
+            <p>2. 元素可以切换文本、图片类型，调整内容、位置、大小等。</p>
+            <p>3. 在“背景设置”中，你可以设置背景的颜色、渐变、图片等。</p>
+            <p>4. 在“模板设置”中，你可以保存当前的设置为模板，也可以导入模板。</p>
+            <p>5. 在“批量生成”中，你可以导入数据，批量生成图片。</p>
+            <p>6. 在“下载图片”中，你可以下载当前的图片。</p>
         </div>
     </div>
     <div id="contactModal" class="modal">
@@ -117,7 +123,7 @@
             <div id="blockList">
                 <!-- Block列表将在这里动态生成 -->
             </div>
-            <button id="addBlock">添加新Block</button>
+            <button id="addBlock">添加元素</button>
         </div>
 
         <!-- 模板设置部分 -->

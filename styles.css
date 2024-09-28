@@ -43,6 +43,7 @@ body {
     padding: 10px;
     overflow-y: auto;
     border-left: 1px solid #233554;
+    padding-top: 0px; /* 减少顶部内边距 */
 }
 
 h2 {
@@ -96,7 +97,7 @@ button:hover {
     border-radius: 8px;
     margin-bottom: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: max-height 0.3s ease-out, opacity 0.2s ease-out, margin-bottom 0.3s ease-out;
+    transition: max-height 0.3s ease-out, opacity 0.2s ease-out, margin-bottom 0.3s ease-out, padding 0.3s ease-out;
     max-height: 1000px;
     opacity: 1;
     overflow: hidden;
@@ -416,7 +417,7 @@ button:hover {
     border: 1px solid #233554;
     margin-bottom: 10px;
     border-radius: 8px;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease, margin-bottom 0.3s ease;
 }
 
 .settings-toggle:hover {
@@ -428,7 +429,9 @@ button:hover {
     transition: transform 0.3s ease;
     color: #64ffda;
 }
-
+.settings-toggle.collapsed {
+    margin-bottom: 0;
+}
 .settings-toggle.collapsed .toggle-icon {
     transform: rotate(180deg);
 }
@@ -611,7 +614,7 @@ button:hover {
 
 #downloadButton {
     position: absolute;
-    top: 15px;
+    top: 30px;
     right: 20px;
     background-color: #64ffda;
     color: #0a192f;
@@ -890,3 +893,78 @@ header {
     display: block;
     margin: 0 auto;
 }
+
+@media screen and (max-width: 768px) {
+    .container {
+      flex-direction: column;
+      padding: 10px;
+    }
+  
+    .image-preview {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+  
+    .editor-panel {
+      width: 100%;
+    }
+  
+    .settings-toggle {
+      font-size: 16px;
+      padding: 10px;
+    }
+  
+    .setting-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .setting-row label {
+      margin-bottom: 5px;
+    }
+  
+    .setting-row input[type="number"],
+    .setting-row input[type="color"],
+    .setting-row select {
+      width: 100%;
+    }
+  
+    .button-row {
+      flex-direction: column;
+    }
+  
+    .button-row button {
+      width: 100%;
+      margin: 5px 0;
+    }
+  
+    #gradientPresets {
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+  
+    #gradientPresets button {
+      width: 48%;
+      margin: 2px 0;
+    }
+    .image-preview {
+        position: relative;
+        padding-top: 60px; /* 增加顶部内边距 */
+    }
+
+    #scaleInfo {
+        top: 10px;
+        left: 10px;
+        right: auto;
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    #downloadButton {
+        top: 30px;
+        right: 10px;
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+  }
+
