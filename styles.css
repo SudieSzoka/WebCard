@@ -13,6 +13,41 @@
     src: url('./fonts/仓迹高德国妙黑.otf') format('opentype');
 }
 
+@font-face {
+    font-family: '打字机';
+    src: url('./fonts/香萃打字机体 W40.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: '游趣';
+    src: url('./fonts/ChildFunSans-Demo.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: '春风';
+    src: url('./fonts/字体家AI造字春风.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: '扁桃';
+    src: url('./fonts/ChillReunion_Round.otf') format('opentype');
+}
+
+@font-face {
+    font-family: '宫殿';
+    src: url('./fonts/aosagi.otf') format('opentype');
+}
+
+@font-face {
+    font-family: '珠圆';
+    src: url('./fonts/猫啃珠圆体 MaokenZhuyuanTi.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: '仓迹妙黑';
+    src: url('./fonts/仓迹高德国妙黑.otf') format('opentype');
+}
+
 body {
     font-family: 'Roboto', sans-serif;
     background-color: #0a192f;

@@ -170,13 +170,19 @@ function addBlock() {
 // 添加字体数组
 const availableFonts = [
     // 添加你的自定义字体
-    { name: '仓迹高德国妙黑', value: '仓迹高德国妙黑' },
+    { name:'打字机', value: '打字机'},
+    { name:'游趣', value: '游趣'},
+    { name:'春风', value: '春风'},
+    { name:'扁桃', value: '扁桃'},
+    { name:'宫殿', value: '宫殿'},
+    { name:'珠圆', value: '珠圆'},
+    { name: '仓迹妙黑', value: '仓迹高德国妙黑' },
     { name: '宋体', value: 'SimSun' },
     { name: '黑体', value: 'SimHei' },
     { name: '微软雅黑', value: 'Microsoft YaHei' },
     { name: '楷体', value: 'KaiTi' },
     { name: '仿宋', value: 'FangSong' },
-    { name: 'LXGW Marker Gothic', value: 'LXGW Marker Gothic' },
+    { name: '落霞孤鹜', value: 'LXGW Marker Gothic' },
     { name: 'Source Han Serif CN', value: 'Source Han Serif CN' },
     { name: 'Arial', value: 'Arial' },
     { name: 'Times New Roman', value: 'Times New Roman' },
@@ -252,7 +258,7 @@ function updateBlockList(isNewBlock = false) {
                             <label for="font">字体</label>
                             <select class="font">
                                 ${availableFonts.map(font => 
-                                    `<option value="${font.value}" ${block.font === font.value ? 'selected' : ''}>${font.name}</option>`
+                                    `<option value="${font.value}" style="font-family: '${font.value}', sans-serif;" ${block.font === font.value ? 'selected' : ''}>${font.name}</option>`
                                 ).join('')}
                             </select>
                             <span class="setting-description">设置文本字体</span>
