@@ -758,9 +758,9 @@ button:hover {
     box-shadow: 0 0 0 2px #64ffda;
 }
 
-#lockAspectRatio {
-    width: auto;
-    height: auto;
+.setting-row input[type="checkbox"]#lockAspectRatio {
+    width: 24px;
+    height: 24px;
     margin-right: 10px;
 }
 
@@ -774,7 +774,7 @@ button:hover {
 
 .setting-row.aspect-ratio-lock {
     justify-content: flex-start;
-    align-items: flex-start; /* 改为 flex-start */
+    align-items: center;
 }
 
 .setting-row.aspect-ratio-lock label {
@@ -783,14 +783,20 @@ button:hover {
 }
 
 .setting-row.aspect-ratio-lock input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-    vertical-align: top; /* 改为 top */
-    accent-color: #64ffda;
-    /* 添加以下属性 */
-    margin-left: 0;
-    padding-left: 0;
+    width: 24px; /* 增加宽度 */
+    height: 24px; /* 增加高度 */
+    margin-right: 8px;
+    vertical-align: middle;
+    accent-color: #64ffda; /* 使用主题色 */
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-wrapper label {
+    margin-right: 10px; /* 增加标签和复选框之间的间距 */
 }
 
 /* Header 样式 */
@@ -1002,4 +1008,30 @@ header {
         font-size: 14px;
     }
   }
+
+.text-style-options {
+    display: flex;
+    gap: 10px; /* 在选项之间添加一些间距 */
+}
+
+.text-style-options label {
+    display: flex;
+    align-items: center;
+}
+
+.text-style-options input[type="checkbox"] {
+    margin-right: 5px; /* 在复选框和文本之间添加一些间距 */
+}
+
+.text-style-options span {
+    writing-mode: horizontal-tb; /* 确保文本横向显示 */
+    text-orientation: mixed; /* 使用混合文本方向 */
+    white-space: nowrap; /* 防止文本换行 */
+}
+
+.lock-aspect-ratio {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
 

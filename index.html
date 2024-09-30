@@ -24,7 +24,7 @@
     <div id="instructionsModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>使用说明</h2>
+            <h2>使用Tip</h2>
             <p>1. 点击“添加元素”按钮，在图片上添加一个Block。</p>
             <p>2. 元素可以切换文本、图片类型，调整内容、位置、大小等。</p>
             <p>3. 在“背景设置”中，你可以设置背景的颜色、渐变、图片等。</p>
@@ -36,7 +36,7 @@
     <div id="contactModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>联系我们</h2>
+            <h2>交流群</h2>
             <img src="image/me.jpg" alt="联系我们" id="contactImage">
         </div>
     </div>
@@ -71,12 +71,11 @@
                         <input type="number" id="canvasHeight" value="400">
                     </div>
                     <!-- 添加新的锁定比例选项 -->
-                    <div class="setting-row">
-                        <label for="lockAspectRatio">锁定比例 </label>
-                        <input type="checkbox" id="lockAspectRatio">
-                        <!-- 添加新的锁定比例选项 
-                        <span class="setting-description">保持宽高比例不变</span>
-                        -->
+                    <div class="setting-row lock-aspect-ratio">
+                        <div class="checkbox-wrapper">
+                            <label for="lockAspectRatio">锁定比例</label>
+                            <input type="checkbox" id="lockAspectRatio">
+                        </div>
                     </div>
                     <div id="solidColorSettings" class="background-option">
                         <div class="setting-row">

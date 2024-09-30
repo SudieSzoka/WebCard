@@ -33,6 +33,9 @@ class Block {
         this.lineHeight = 1.2; // 添加行高属性
         this.imageWidth = 0;
         this.imageHeight = 0;
+        this.isBold = false; // 添加粗体属性
+        this.isItalic = false; // 添加斜体属性
+        this.opacity = 1; // 添加透明度属性,默认为1(完全不透明)
     }
     
     loadImage(src) {
@@ -56,13 +59,20 @@ class Block {
         });
     }
     render(ctx) {
+        // 保存当前上下文状态
+        ctx.save();
+        // 设置全局透明度
+        ctx.globalAlpha = this.opacity;
+        
         // 使用this.x和this.y绘制Block的边框和背景
         ctx.fillStyle = 'rgba(200, 200, 200, 0)';
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
         if (this.type === 'text') {
             ctx.fillStyle = 'black';
-            const fontString = `${this.fontSize}px "${this.font}", sans-serif`;
+            let fontString = `${this.fontSize}px "${this.font}", sans-serif`;
+            if (this.isBold) fontString = 'bold ' + fontString;
+            if (this.isItalic) fontString = 'italic ' + fontString;
             ctx.font = fontString;
             ctx.textAlign = this.textAlign;
             ctx.textBaseline = 'top';
@@ -100,6 +110,8 @@ class Block {
             ctx.lineWidth = 2;
             ctx.strokeRect(this.x, this.y, this.width, this.height);
         }
+        // 恢复上下文状态
+        ctx.restore();
     }
 }
 
@@ -208,6 +220,12 @@ function updateBlockList(isNewBlock = false) {
                         <span class="setting-description">设置Block的名称</span>
                     </div>
                     <div class="setting-row">
+                        <label for="blockOpacity">透明度</label>
+                        <input type="range" class="block-opacity" value="${block.opacity}" min="0" max="1" step="0.1">
+                        <span class="opacity-value">${block.opacity.toFixed(1)}</span>
+                        <span class="setting-description">设置元素的透明度(0-1)</span>
+                    </div>
+                    <div class="setting-row">
                         <label for="blockType">类型</label>
                         <select class="blockType">
                             <option value="text" ${block.type === 'text' ? 'selected' : ''}>文本</option>
@@ -267,6 +285,20 @@ function updateBlockList(isNewBlock = false) {
                             <label for="fontSize">字体大小</label>
                             <input type="number" class="font-size" value="${block.fontSize}" min="1">
                             <span class="setting-description">设置文本字体大小</span>
+                        </div>
+                        <div class="setting-row">
+                            <label for="textStyle">文本样式</label>
+                            <div class="text-style-options">
+                                <label>
+                                    <input type="checkbox" class="bold-text" ${block.isBold ? 'checked' : ''}> 
+                                    <span>粗体</span>
+                                </label>
+                                <label>
+                                    <input type="checkbox" class="italic-text" ${block.isItalic ? 'checked' : ''}> 
+                                    <span>斜体</span>
+                                </label>
+                            </div>
+                            <span class="setting-description">设置文本粗体和斜体</span>
                         </div>
                         <div class="setting-row">
                             <label for="xPosition">X坐标</label>
@@ -365,6 +397,15 @@ function updateBlockList(isNewBlock = false) {
         deleteButton.addEventListener('click', () => {
             blocks.splice(index, 1);
             updateBlockList();
+            updatePreview();
+        });
+        
+        // 添加透明度滑块的事件监听器
+        const opacitySlider = blockElement.querySelector('.block-opacity');
+        const opacityValue = blockElement.querySelector('.opacity-value');
+        opacitySlider.addEventListener('input', function() {
+            block.opacity = parseFloat(this.value);
+            opacityValue.textContent = block.opacity.toFixed(1);
             updatePreview();
         });
     });
@@ -507,6 +548,22 @@ function addBlockEventListeners(blockElement, block, index) {
             }
             reader.readAsDataURL(file);
         }
+    });
+    // 字体粗体、斜体的监听
+    blockElement.querySelector('.bold-text').addEventListener('change', (e) => {
+        block.isBold = e.target.checked;
+        updatePreview();
+    });
+
+    blockElement.querySelector('.italic-text').addEventListener('change', (e) => {
+        block.isItalic = e.target.checked;
+        updatePreview();
+    });
+    // 添加透明度滑块的事件监听器
+    blockElement.querySelector('.block-opacity').addEventListener('input', (e) => {
+        block.opacity = parseFloat(e.target.value);
+        blockElement.querySelector('.opacity-value').textContent = block.opacity.toFixed(1);
+        updatePreview();
     });
 }
 
