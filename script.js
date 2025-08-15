@@ -36,6 +36,7 @@ class Block {
         this.isBold = false; // 添加粗体属性
         this.isItalic = false; // 添加斜体属性
         this.opacity = 1; // 添加透明度属性,默认为1(完全不透明)
+        this.textColor = '#000000'; // 添加文字颜色属性，默认为黑色
     }
     
     loadImage(src) {
@@ -69,7 +70,7 @@ class Block {
         ctx.fillRect(this.x, this.y, this.width, this.height);
 
         if (this.type === 'text') {
-            ctx.fillStyle = 'black';
+            ctx.fillStyle = this.textColor; // 使用 this.textColor
             let fontString = `${this.fontSize}px "${this.font}", sans-serif`;
             if (this.isBold) fontString = 'bold ' + fontString;
             if (this.isItalic) fontString = 'italic ' + fontString;
@@ -299,6 +300,11 @@ function updateBlockList(isNewBlock = false) {
                                 </label>
                             </div>
                             <span class="setting-description">设置文本粗体和斜体</span>
+                        </div>
+                        <div class="setting-row">
+                            <label for="textColor">文字颜色</label>
+                            <input type="color" class="text-color" value="${block.textColor}">
+                            <span class="setting-description">设置文字颜色</span>
                         </div>
                         <div class="setting-row">
                             <label for="xPosition">X坐标</label>
@@ -559,6 +565,11 @@ function addBlockEventListeners(blockElement, block, index) {
         block.isItalic = e.target.checked;
         updatePreview();
     });
+
+    blockElement.querySelector('.text-color').addEventListener('input', (e) => {
+        block.textColor = e.target.value;
+        updatePreview();
+    });
     // 添加透明度滑块的事件监听器
     blockElement.querySelector('.block-opacity').addEventListener('input', (e) => {
         block.opacity = parseFloat(e.target.value);
@@ -578,15 +589,16 @@ function updateBlockSettings(blockElement, block) {
         blockElement.querySelector('.image-height').value = block.imageHeight || '';
     }
     // 初始化新类型的默认值
-    if (oldType !== newType) {
-        if (newType === 'text') {
-            block.content = '新文字块';
-            block.textAlign = 'center';
-            block.verticalAlign = 'middle';
-            block.font = 'Arial';
-            block.fontSize = 16;
-            block.x = 0;
-            //block.contentY = 0; // 重置 contentY
+            if (oldType !== newType) {
+            if (newType === 'text') {
+                block.content = '新文字块';
+                block.textAlign = 'center';
+                block.verticalAlign = 'middle';
+                block.font = 'Arial';
+                block.fontSize = 16;
+                block.x = 0;
+                block.textColor = '#000000'; // 重置文字颜色为黑色
+                //block.contentY = 0; // 重置 contentY
 
         } else if (newType === 'image') {
             block.image = null;
