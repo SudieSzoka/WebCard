@@ -1317,11 +1317,15 @@ function exportTextBlocks(format) {
                       ('0' + now.getDate()).slice(-2);
 
     if (format === 'csv') {
-        // CSV 导出逻辑
+        // CSV 导出逻辑 - 修复中文乱码问题
         let csvContent = keys.join(',') + '\n';
         csvContent += keys.map(key => textBlocks[keys.indexOf(key)].content).join(',');
         const fileName = `卡片模板_${templateName}_${timestamp}.csv`;
-        downloadFile(csvContent, fileName, 'text/csv;charset=utf-8;');
+        
+        // 添加BOM和正确的编码设置
+        const BOM = '\uFEFF'; // UTF-8 BOM
+        const csvWithBOM = BOM + csvContent;
+        downloadFile(csvWithBOM, fileName, 'text/csv;charset=utf-8');
     } else if (format === 'json') {
         // JSON 导出逻辑保持不变
         const jsonData = [
@@ -1377,7 +1381,10 @@ function importData(file) {
     reader.readAsText(file);
 }
 function parseCSV(csv) {
-    const lines = csv.split('\n').filter(line => line.trim() !== '');
+    // 移除BOM（如果存在）
+    const cleanCsv = csv.replace(/^\uFEFF/, '');
+    
+    const lines = cleanCsv.split('\n').filter(line => line.trim() !== '');
     if (lines.length === 0) {
         throw new Error('CSV 文件为空或格式不正确');
     }
