@@ -1403,7 +1403,11 @@ function generateImages(data) {
                 const newBlock = new Block(block.height, block.width);
                 Object.assign(newBlock, JSON.parse(JSON.stringify(block)));
                 if (newBlock.type === 'text') {
-                    // ... existing code ...
+                    // 根据导入的数据替换文本内容
+                    const blockKey = `${index + 1}_${block.name}`;
+                    if (item[blockKey]) {
+                        newBlock.content = item[blockKey];
+                    }
                 } else if (newBlock.type === 'image' && block.image) {
                     await newBlock.loadImage(block.image.src);
                 }
